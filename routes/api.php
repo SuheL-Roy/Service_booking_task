@@ -29,18 +29,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Customer routes
-     Route::middleware('role:customer')->group(function () {
-        Route::get('/services', [ServiceController::class, 'index']);
-        Route::post('/bookings', [BookingController::class, 'store']);
-        Route::get('/bookings', [BookingController::class, 'userBookings']);
+     Route::middleware('role:customer') ->prefix('customer')->group(function () {
+        Route::get('/services', [ServiceController::class, 'list_services']);
+        Route::post('/store-bookings', [BookingController::class, 'store_booking']);
+        Route::get('/user-bookings', [BookingController::class, 'user_bookings']);
     });
 
     // Admin routes
-    Route::middleware('role:admin')->group(function () {
-        Route::post('/services', [ServiceController::class, 'store']);
-        Route::put('/services/{id}', [ServiceController::class, 'update']);
-        Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
-        Route::get('/admin/bookings', [BookingController::class, 'allBookings']);
+    Route::middleware('role:admin')->prefix('admin')->group(function () {
+        Route::post('/store-services', [ServiceController::class, 'store_service']);
+        Route::put('/update-services/{id}', [ServiceController::class, 'update_service']);
+        Route::delete('/destroy-services/{id}', [ServiceController::class, 'destroy_service']);
+        Route::get('/all-bookings', [BookingController::class, 'allBookings']);
     });
   
 });
