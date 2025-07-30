@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ServiceRequest;
+use App\Http\Resources\ServiceResource;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -13,33 +15,19 @@ class ServiceController extends Controller
         return Service::where('status', true)->get();
     }
 
-    public function store_service(Request $request)
+    public function store_service(ServiceRequest $request)
     {
-        $data = $request->validate([
-            'name' => 'required',
-            'description' => 'nullable',
-            'price' => 'required|numeric',
-            'status' => 'boolean',
-        ]);
 
-        $service =  Service::create($data);
+        $service = Service::create($request->validated());
 
         return response()->json([
-            'success' => true,
-            'message' => 'Service created successfully.',
-            'data' => $service
+            'message' => 'Service stored successfully.',
+            'data'    => new ServiceResource($service),
         ], 201);
     }
 
-    public function update_service(Request $request, $id)
+    public function update_service(ServiceRequest $request, $id)
     {
-        $data = $request->validate([
-            'name' => 'string',
-            'description' => 'nullable',
-            'price' => 'numeric',
-        ]);
-
-
         try {
             $service = Service::findOrFail($id);
         } catch (ModelNotFoundException $e) {
@@ -48,13 +36,13 @@ class ServiceController extends Controller
                 'message' => 'Service not found.',
             ], 404);
         }
-        $service = Service::findOrFail($id);
-        $service->update($data);
+
+        $service->update($request->validated());
 
         return response()->json([
             'success' => true,
             'message' => 'Service updated successfully.',
-            'data' => $service
+            'data'    => new ServiceResource($service),
         ], 200);
     }
 
@@ -71,19 +59,19 @@ class ServiceController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Service deleted successfully.',
-                'data' => $service
+                'data'    => new ServiceResource($service),
             ], 200);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Service not found.',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete service.',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
