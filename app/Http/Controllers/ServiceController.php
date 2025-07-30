@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Service;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ServiceController extends Controller
 {
     public function list_services(Request $request)
     {
-          return Service::where('status', true)->get();
+        return Service::where('status', true)->get();
     }
 
     public function store_service(Request $request)
@@ -39,7 +40,14 @@ class ServiceController extends Controller
         ]);
 
 
-
+        try {
+            $service = Service::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Service not found.',
+            ], 404);
+        }
         $service = Service::findOrFail($id);
         $service->update($data);
 
