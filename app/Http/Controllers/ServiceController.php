@@ -22,7 +22,6 @@ class ServiceController extends Controller
 
         return response()->json([
             'message' => 'Service stored successfully.',
-            'data'    => new ServiceResource($service),
         ], 201);
     }
 

@@ -2,56 +2,55 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BookingRequest;
+use App\Http\Resources\BookingResource;
+use App\Models\Booking;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
     public function allBookings(Request $request)
     {
-        // Logic to retrieve all bookings for admin
-        // This could involve fetching all bookings from the database
-        // and returning them in a response.
+        $bookings = Booking::select(
+            'bookings.*',
+            'services.name as service_name',
+            'users.name as user_name'
+        )
+            ->join('services', 'bookings.service_id', '=', 'services.id')
+            ->join('users', 'bookings.user_id', '=', 'users.id')
 
-        return response()->json([
-            'message' => 'All bookings retrieved successfully',
-            // 'bookings' => $allBookings, // Uncomment and replace with actual data
-        ]);
+            ->get();
+        return BookingResource::collection($bookings);
     }
 
     public function user_bookings(Request $request)
     {
-        // Logic to retrieve bookings for the authenticated user
-        // This could involve fetching bookings from the database
-        // and returning them in a response.
+        $bookings = Booking::select(
+            'bookings.*',
+            'services.name as service_name',
+            'users.name as user_name'
+        )
+            ->join('services', 'bookings.service_id', '=', 'services.id')
+            ->join('users', 'bookings.user_id', '=', 'users.id')
+            ->where('bookings.user_id', auth()->id())
+            ->get();
 
-        return response()->json([
-            'message' => 'User bookings retrieved successfully',
-            // 'bookings' => $bookings, // Uncomment and replace with actual data
-        ]);
+        return BookingResource::collection($bookings);
     }
-    public function store_booking(Request $request)
+    public function store_booking(BookingRequest $request)
     {
-        // Logic to create a new booking
-        // This could involve validating the request data,
-        // creating a booking record in the database, etc.
+       
+        Booking::create([
+            'user_id'      => auth()->id(),
+            'service_id'   => $request->service_id,
+            'booking_date' => $request->booking_date,
+            'status'       => 'pending',
+        ]);
 
         return response()->json([
-            'message' => 'Booking created successfully',
-            // 'booking' => $booking, // Uncomment and replace with actual data
-        ]);
-    }
+            'success' => true,
+            'message' => 'Booking stored successfully.',
 
-
-
-    public function update_booking(Request $request, $id)
-    {
-        // Logic to update an existing booking
-        // This could involve validating the request data,
-        // updating the booking record in the database, etc.
-
-        return response()->json([
-            'message' => 'Booking updated successfully',
-            // 'booking' => $updatedBooking, // Uncomment and replace with actual data
-        ]);
+        ], 200);
     }
 }
